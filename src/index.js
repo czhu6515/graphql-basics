@@ -5,8 +5,10 @@ import { GraphQLServer } from 'graphql-yoga'
 // Type definitions (schema)
 const typeDefs = `
   type Query {
+    greeting(name: String, position: String): String!
     me: User!
     post: Post!
+    add(x: Float, y: Float): Float!
   }
 
   type User {
@@ -41,7 +43,20 @@ const resolvers = {
         body: "This is not the body of the best post ever, it's just a tribute",
         published: true,
       }
+    },
+    greeting(parent, args, ctx, info){
+      if (args.name && args.position){
+        return `Hello ${args.name}, you are the best ${args.position} in the world!`
+      }
+      return "Hello there"
+    },
+    add(parent, args, ctx, info){
+      if (args.x && args.y){
+        return args.x + args.y
+      }
+      return "Enter two numbers"
     }
+    
   }
 }
 
