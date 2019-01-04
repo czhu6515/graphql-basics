@@ -25,23 +25,53 @@ const users = [
 // Demo Posts Data
 const posts = [
   {
-    id: 1,
+    id: 11,
     title: 'Test',
     body: 'This should come back',
-    published: false
+    published: false,
+    author: 1,
   },
   {
-    id: 2,
+    id: 12,
     title: 'blah',
     body: 'this should not come back',
-    published: false
+    published: false,
+    author: 1
   },
   {
-    id: 3,
+    id: 13,
     title: 'Yay',
     body: 'This test should come back',
-    published: false
+    published: false,
+    author: 2,
   }
+]
+
+const comments = [
+  {
+    id: 21,
+    text: "first comment",
+    author: 3,
+    post: 11,
+  },
+  {
+    id: 22,
+    text: "second comment",
+    author: 3,
+    post: 12,
+  },
+  {
+    id: 23,
+    text: "third comment",
+    author: 1,
+    post: 12,
+  },
+  {
+    id: 24,
+    text: "fourth comment",
+    author: 2,
+    post: 13,
+  },
 ]
 
 // Type definitions (schema)
@@ -51,6 +81,7 @@ const typeDefs = `
     me: User!
     post: Post!
     posts(query: String): [Post!]!
+    comments: [Comment!]!
   }
 
   type User {
@@ -58,6 +89,8 @@ const typeDefs = `
     name: String!
     email: String!
     age: Int
+    posts: [Post!]!
+    comments: [Comment!]!
   }
 
   type Post {
@@ -65,6 +98,15 @@ const typeDefs = `
     title: String!
     body: String!
     published: Boolean!
+    author: User!
+    comments: [Comment!]!
+  }
+
+  type Comment {
+    id: ID!
+    text: String!
+    author: User!
+    post: Post!
   }
 `
 
@@ -99,6 +141,33 @@ const resolvers = {
         return posts
       }
       return posts.filter( post => post.title.toLowerCase().includes(query.toLowerCase()) || post.body.toLowerCase().includes(query.toLowerCase()))
+    },
+    comments(parent, args, ctx, info){
+      return comments
+    }
+  },
+  Post: {
+    author(parent, args, ctx, info){
+      return users.find((user) => user.id === parent.author)
+    },
+    comments(parent, args, ctx, info){
+      return comments.filter((comment) => comment.post === parent.id)
+    }
+  },
+  User: {
+    posts(parent, args, ctx, info){
+      return posts.filter((post) => post.author === parent.id)
+    },
+    comments(parent, args, ctx, info){
+      return comments.filter((comment) => comment.author === parent.id)
+    },
+  },
+  Comment: {
+    author(parent, args, ctx, info){
+      return users.find((user) => user.id === parent.author)
+    },
+    post(parent, args, ctx, info){
+      return posts.find((post) => post.id === parent.post)
     }
   }
 }
