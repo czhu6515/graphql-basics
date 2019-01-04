@@ -2,13 +2,55 @@ import { GraphQLServer } from 'graphql-yoga'
 
 // Scalar Types = String, Boolean, Int, Float, ID
 
+// Demo User Data
+const users = [
+  {
+    id: 1,
+    name: 'Chen',
+    email: 'chen@example.com',
+  },
+  {
+    id: 2,
+    name: 'Bob',
+    email: 'Bob@example.com',
+    age: 33
+  },
+  {
+    id: 3,
+    name: 'Jane',
+    email: 'jane@example.com',
+    age: 23
+  }
+]
+// Demo Posts Data
+const posts = [
+  {
+    id: 1,
+    title: 'Test',
+    body: 'This should come back',
+    published: false
+  },
+  {
+    id: 2,
+    title: 'blah',
+    body: 'this should not come back',
+    published: false
+  },
+  {
+    id: 3,
+    title: 'Yay',
+    body: 'This test should come back',
+    published: false
+  }
+]
+
 // Type definitions (schema)
 const typeDefs = `
   type Query {
-    greeting(name: String, position: String): String!
+    users(query: String): [User!]!
     me: User!
     post: Post!
-    add(x: Float, y: Float): Float!
+    posts(query: String): [Post!]!
   }
 
   type User {
@@ -29,6 +71,13 @@ const typeDefs = `
 // Resolvers
 const resolvers = {
   Query: {
+    users(parent, args, ctx, info){
+      const { query } = args
+      if (!query){
+        return users
+      }
+      return users.filter( user => user.name.toLowerCase().includes(query.toLowerCase()))
+    },
     me() {
       return {
         id: '12131fds',
@@ -44,19 +93,13 @@ const resolvers = {
         published: true,
       }
     },
-    greeting(parent, args, ctx, info){
-      if (args.name && args.position){
-        return `Hello ${args.name}, you are the best ${args.position} in the world!`
+    posts(parent, args, ctx, info){
+      const { query } = args
+      if (!query){
+        return posts
       }
-      return "Hello there"
-    },
-    add(parent, args, ctx, info){
-      if (args.x && args.y){
-        return args.x + args.y
-      }
-      return "Enter two numbers"
+      return posts.filter( post => post.title.toLowerCase().includes(query.toLowerCase()) || post.body.toLowerCase().includes(query.toLowerCase()))
     }
-    
   }
 }
 
